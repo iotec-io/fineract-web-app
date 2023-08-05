@@ -1,0 +1,31 @@
+name: Publish Image in Docker Hub
+
+on:
+  push:
+    branches: [ iotec ]
+  pull_request:
+    branches: [ iotec ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+        WEB_APP_VERSION: 1.0.0
+        IMAGE_NAME: ghcr.io/${{ github.repository }}/web-app:1.0.0
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Login to GitHub Container Registry
+      run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Build the Docker image
+      run: docker build -t web-app:latest .
+
+    - name: Docker Github Prepare
+      run: docker image tag web-app $IMAGE_NAME
+
+    - name: Push the image to GitHub Container Registry
+      run: docker push $IMAGE_NAME
